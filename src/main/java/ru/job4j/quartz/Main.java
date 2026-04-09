@@ -1,36 +1,51 @@
 package ru.job4j.quartz;
 
+import org.apache.log4j.Logger;
 import ru.job4j.quartz.model.Post;
 import ru.job4j.quartz.service.Config;
 import ru.job4j.quartz.service.SchedulerManager;
 import ru.job4j.quartz.service.SuperJobGrab;
-import ru.job4j.quartz.stores.MemStore;
+import ru.job4j.quartz.stores.JdbcStore;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 
 public class Main {
+    private static final Logger log = Logger.getLogger(Main.class);
 
     public static void main(String[] args) {
-
-
-
-
-
         var config = new Config();
-
         config.load("application.properties");
-        var store = new MemStore();
-        var post = new Post();
-        post.setTitle("Super Java Job");
-        store.save(post);
-        var scheduler = new SchedulerManager();
-        scheduler.init();
-        scheduler.load(
-                Integer.parseInt(config.get("rabbit.interval")),
-                SuperJobGrab.class,
-                store
-        );
-
-
+        try {
+            Class.forName(config.get("db.driver-class-name"));
+        } catch (ClassNotFoundException e) {
+            log.error("Driver class not found", e);
+            return;
+        }
+        try (Connection connection = DriverManager.getConnection(
+                config.get("db.url"),
+                config.get("db.username"),
+                config.get("db.password"));
+             SchedulerManager scheduler = new SchedulerManager()) {
+            var store = new JdbcStore(connection);
+            var post = new Post();
+            post.setTitle("Super Java Job");
+            post.setTime(new Timestamp(System.currentTimeMillis()));
+            store.save(post);
+            scheduler.init();
+            scheduler.load(
+                    Integer.parseInt(config.get("rabbit.interval")),
+                    SuperJobGrab.class,
+                    store
+            );
+            Thread.sleep(10000);
+        } catch (SQLException e) {
+            log.error("When create a connection", e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.error("Main thread interrupted", e);
+        }
     }
-
-
 }

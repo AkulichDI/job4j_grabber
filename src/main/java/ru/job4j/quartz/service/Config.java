@@ -15,8 +15,11 @@ public class Config {
     public void load (String file ){
 
         try(InputStream in = Config.class.getClassLoader().getResourceAsStream(file)){
+            if (in == null) {
+                throw new IllegalArgumentException("Resource not found: " + file);
+            }
             properties.load(in);
-        }catch (IOException e ){
+        }catch (IOException | IllegalArgumentException e ){
             log.error(String.format("When load file : %s", file), e);
         }
 

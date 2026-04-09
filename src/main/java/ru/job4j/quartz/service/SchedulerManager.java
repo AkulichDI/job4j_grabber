@@ -2,7 +2,6 @@ package ru.job4j.quartz.service;
 
 import org.apache.log4j.Logger;
 import org.quartz.*;
-import org.quartz.impl.StdScheduler;
 import org.quartz.impl.StdSchedulerFactory;
 
 import static org.quartz.JobBuilder.newJob;
@@ -30,7 +29,7 @@ public class SchedulerManager implements AutoCloseable{
 
     }
 
-    public void load(int period, Class<SuperJobGrab> task, Store store ){
+    public void load(int period, Class<? extends Job> task, Store store ){
 
         try {
 
@@ -60,7 +59,7 @@ public class SchedulerManager implements AutoCloseable{
 
 
     @Override
-    public void close() throws Exception {
+    public void close() {
 
         if (scheduler != null){
             try{

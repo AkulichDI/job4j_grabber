@@ -1,5 +1,6 @@
 package ru.job4j.quartz.model;
 
+import java.sql.Timestamp;
 import java.util.Objects;
 
 public class Post {
@@ -8,7 +9,7 @@ public class Post {
     private String title;
     private String link;
     private String description;
-    private Long time;
+    private Timestamp time;
 
     @Override
     public boolean equals(Object object) {
@@ -54,15 +55,15 @@ public class Post {
         this.description = description;
     }
 
-    public Long getTime() {
+    public Timestamp getTime() {
         return time;
     }
 
-    public void setTime(Long time) {
+    public void setTime(Timestamp time) {
         this.time = time;
     }
 
-    public Post(Long id, String title, String link, String description, Long time) {
+    public Post(Long id, String title, String link, String description, Timestamp time) {
         this.id = id;
         this.title = title;
         this.link = link;
