@@ -5,4 +5,4 @@ CREATE TABLE posts IF NOT EXISTS (
     description TEXT,
     created TIMESTAMP
 
-)
+);
