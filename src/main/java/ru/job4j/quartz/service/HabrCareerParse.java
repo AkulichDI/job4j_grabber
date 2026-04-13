@@ -16,7 +16,7 @@ public class HabrCareerParse implements Parse{
     private static final String SOURCE_LINK = "https://career.habr.com";
     private static String PREFIX = "/vacancies?page=";
     private static String SUFFIX = "&q=Java%20developer&type=all";
-
+    private static final int PAGES     =  5;
 
 
 
@@ -28,34 +28,37 @@ public class HabrCareerParse implements Parse{
         var result = new ArrayList<Post>();
 
         try {
-            int pageNumber = 1;
-            String fullLink = "%s%s%d$s".formatted(SOURCE_LINK, PREFIX, pageNumber, SUFFIX);
-            var connection = Jsoup.connect(fullLink);
-            var document = connection.get();
-            var rows = document.select(".vacancy-card__inner");
 
-            rows.forEach( row -> {
+            for (int i = 1; i <= PAGES; i++ ) {
 
-                var titleElement = row.select(".vacancy-card__title").first();
-                var linkElement = titleElement.child(0);
-                var dateElement =  row.select(".vacancy-card__date").first();
-                String vacancyName = titleElement.text();
-                var vacancyDate = Timestamp.from(
-                        OffsetDateTime.parse(dateElement.child(0).attr("datetime")).toInstant()
-                );
-                String link = String.format("%s%s", SOURCE_LINK, linkElement.attr("href"));
+                int pageNumber = i;
+                String fullLink = "%s%s%d$s".formatted(SOURCE_LINK, PREFIX, pageNumber, SUFFIX);
+                var connection = Jsoup.connect(fullLink);
+                var document = connection.get();
+                var rows = document.select(".vacancy-card__inner");
+
+                rows.forEach(row -> {
+
+                    var titleElement = row.select(".vacancy-card__title").first();
+                    var linkElement = titleElement.child(0);
+                    var dateElement = row.select(".vacancy-card__date").first();
+                    String vacancyName = titleElement.text();
+                    var vacancyDate = Timestamp.from(
+                            OffsetDateTime.parse(dateElement.child(0).attr("datetime")).toInstant()
+                    );
+                    String link = String.format("%s%s", SOURCE_LINK, linkElement.attr("href"));
 
 
-                var post = new Post();
+                    var post = new Post();
 
-                System.out.println(vacancyName + ": " + link + " Дата: " +  vacancyDate) ;
+                    System.out.println( String.format("%-70s: %40s Дата: %10s", vacancyName, link, vacancyDate));
 
-                post.setTitle(vacancyName);
-                post.setLink(link);
-                post.setTime(vacancyDate);
-                result.add(post);
-            });
-
+                    post.setTitle(vacancyName);
+                    post.setLink(link);
+                    post.setTime(vacancyDate);
+                    result.add(post);
+                });
+            }
         }catch (IOException e ){
             log.error("When load page", e );
         }
