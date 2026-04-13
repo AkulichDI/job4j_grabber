@@ -13,24 +13,29 @@ import java.util.concurrent.atomic.AtomicLong;
 public class MemStore implements Store {
 
     private final AtomicLong ids = new AtomicLong(1);
-    private final Map<Long, Post> mem = new HashMap<>();
+    private final Map<Long, Post> postsById = new HashMap<>();
+    private final Map<String, Long> idsByLink = new HashMap<>();
 
 
     @Override
     public void save(Post post) {
-        if (post.getId() == null) {
+        Long existingId = idsByLink.get(post.getLink());
+        if (existingId != null) {
+            post.setId(existingId);
+        } else if (post.getId() == null) {
             post.setId(ids.getAndIncrement());
         }
-        mem.put(post.getId(), post);
+        postsById.put(post.getId(), post);
+        idsByLink.put(post.getLink(), post.getId());
     }
 
     @Override
     public List<Post> getAll() {
-        return new ArrayList<>(mem.values());
+        return new ArrayList<>(postsById.values());
     }
 
     @Override
     public Optional<Post> findById(Long id) {
-        return Optional.ofNullable(mem.get(id));
+        return Optional.ofNullable(postsById.get(id));
     }
 }

@@ -3,6 +3,5 @@ CREATE TABLE IF NOT EXISTS posts (
                                      title TEXT,
                                      link  TEXT UNIQUE,
                                      description TEXT,
-                                     created date
-
+                                     created TIMESTAMP WITHOUT TIME ZONE
 );

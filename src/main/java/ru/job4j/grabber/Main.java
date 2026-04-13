@@ -7,13 +7,14 @@ import ru.job4j.grabber.stores.JdbcStore;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.concurrent.CountDownLatch;
 
 public class Main {
     private static final Logger log = Logger.getLogger(Main.class);
 
     public static void main(String[] args) {
         var config = new Config();
-        config.load("application.properties");
+        config.load("app.properties");
         try {
             Class.forName(config.get("db.driver-class-name"));
         } catch (ClassNotFoundException e) {
@@ -32,8 +33,8 @@ public class Main {
                     SuperJobGrab.class,
                     store
             );
-            Thread.sleep(10000);
             new Web(store).start(Integer.parseInt(config.get("server.port")));
+            new CountDownLatch(1).await();
         } catch (SQLException e) {
             log.error("When create a connection", e);
         } catch (InterruptedException e) {

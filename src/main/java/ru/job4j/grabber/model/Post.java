@@ -19,9 +19,7 @@ public class Post {
             return false;
         }
         Post post = (Post) object;
-        return Objects.equals(id, post.id)
-                && Objects.equals(title, post.title)
-                && Objects.equals(link, post.link);
+        return Objects.equals(link, post.link);
     }
 
     @Override
@@ -37,7 +35,7 @@ public class Post {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, title, link);
+        return Objects.hash(link);
     }
 
     public Long getId() {

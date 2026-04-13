@@ -4,6 +4,9 @@ import org.apache.log4j.Logger;
 import ru.job4j.grabber.model.Post;
 import ru.job4j.grabber.service.Store;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,13 +18,36 @@ public class JdbcStore implements Store {
 
     public JdbcStore(Connection connection) {
         this.connection = connection;
+        initTable();
+    }
+
+    private void initTable() {
+        try (InputStream inputStream = JdbcStore.class.getClassLoader().getResourceAsStream("db/init.sql")) {
+            if (inputStream == null) {
+                throw new IllegalStateException("Resource not found: db/init.sql");
+            }
+            String sql = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+            try (Statement statement = connection.createStatement()) {
+                statement.execute(sql);
+            }
+        } catch (SQLException | IOException | IllegalStateException e) {
+            log.error("When init database schema", e);
+        }
     }
 
 
     @Override
     public void save(Post post) {
         try (PreparedStatement statement = connection.prepareStatement(
-                "INSERT INTO  posts (title, link, description, created) VALUES (?, ?, ?, ?)"
+                """
+                        INSERT INTO posts (title, link, description, created)
+                        VALUES (?, ?, ?, ?)
+                        ON CONFLICT (link)
+                        DO UPDATE SET
+                            title = EXCLUDED.title,
+                            description = EXCLUDED.description,
+                            created = EXCLUDED.created
+                        """
         )) {
             statement.setString(1, post.getTitle());
             statement.setString(2, post.getLink());

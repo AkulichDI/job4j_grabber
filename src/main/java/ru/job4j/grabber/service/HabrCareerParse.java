@@ -7,9 +7,11 @@ import ru.job4j.grabber.utils.DateTimeParser;
 import ru.job4j.grabber.utils.HabrCareerDateTimeParser;
 
 import java.io.IOException;
+import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class HabrCareerParse implements Parse {
     private static final Logger LOG = Logger.getLogger(HabrCareerParse.class);
@@ -40,15 +42,22 @@ public class HabrCareerParse implements Parse {
             }
             if (timeElement != null) {
                 String datetime = timeElement.attr("datetime");
-                post.setTime(dateTimeParser.parse(datetime)
-                        .atZone(ZoneId.systemDefault())
-                        .toInstant()
-                        .toEpochMilli());
+                post.setTime(parseTime(datetime));
             }
         } catch (IOException e) {
             LOG.error("When load vacancy details: " + link, e);
         }
         return post;
+    }
+
+    private long parseTime(String datetime) {
+        if (datetime.contains("T") && (datetime.contains("+") || datetime.endsWith("Z"))) {
+            return OffsetDateTime.parse(datetime).toInstant().toEpochMilli();
+        }
+        return dateTimeParser.parse(datetime)
+                .atZone(ZoneId.systemDefault())
+                .toInstant()
+                .toEpochMilli();
     }
 
     @Override
@@ -65,7 +74,7 @@ public class HabrCareerParse implements Parse {
                         return;
                     }
                     String title = titleElement.text();
-                    String lowerTitle = title.toLowerCase();
+                    String lowerTitle = title.toLowerCase(Locale.ROOT);
                     if (!lowerTitle.contains(JAVA) || lowerTitle.contains(JAVASCRIPT)) {
                         return;
                     }
