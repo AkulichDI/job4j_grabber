@@ -1,7 +1,7 @@
-package ru.job4j.quartz.stores;
+package ru.job4j.grabber.stores;
 
-import ru.job4j.quartz.model.Post;
-import ru.job4j.quartz.service.Store;
+import ru.job4j.grabber.model.Post;
+import ru.job4j.grabber.service.Store;
 
 import java.util.ArrayList;
 import java.util.HashMap;

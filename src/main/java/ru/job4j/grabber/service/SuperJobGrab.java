@@ -1,10 +1,10 @@
-package ru.job4j.quartz.service;
+package ru.job4j.grabber.service;
 
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import ru.job4j.quartz.model.Post;
-import ru.job4j.quartz.utils.HabrCareerDateTimeParser;
+import ru.job4j.grabber.model.Post;
+import ru.job4j.grabber.utils.HabrCareerDateTimeParser;
 
 public class SuperJobGrab  implements Job {
     @Override

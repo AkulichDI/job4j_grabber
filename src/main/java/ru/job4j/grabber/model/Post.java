@@ -1,4 +1,4 @@
-package ru.job4j.quartz.model;
+package ru.job4j.grabber.model;
 
 import java.sql.Timestamp;
 import java.util.Objects;

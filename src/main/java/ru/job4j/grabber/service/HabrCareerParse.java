@@ -1,10 +1,10 @@
-package ru.job4j.quartz.service;
+package ru.job4j.grabber.service;
 
 import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
-import ru.job4j.quartz.model.Post;
-import ru.job4j.quartz.utils.DateTimeParser;
-import ru.job4j.quartz.utils.HabrCareerDateTimeParser;
+import ru.job4j.grabber.model.Post;
+import ru.job4j.grabber.utils.DateTimeParser;
+import ru.job4j.grabber.utils.HabrCareerDateTimeParser;
 
 import java.io.IOException;
 import java.sql.Timestamp;

@@ -1,4 +1,4 @@
-package ru.job4j.quartz.utils;
+package ru.job4j.grabber.utils;
 
 import org.junit.jupiter.api.Test;
 

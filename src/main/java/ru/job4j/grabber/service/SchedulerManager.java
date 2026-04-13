@@ -1,4 +1,4 @@
-package ru.job4j.quartz.service;
+package ru.job4j.grabber.service;
 
 import org.apache.log4j.Logger;
 import org.quartz.*;
