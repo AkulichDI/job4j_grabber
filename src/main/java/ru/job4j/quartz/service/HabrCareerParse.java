@@ -3,99 +3,86 @@ package ru.job4j.quartz.service;
 import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
 import ru.job4j.quartz.model.Post;
+import ru.job4j.quartz.utils.DateTimeParser;
+import ru.job4j.quartz.utils.HabrCareerDateTimeParser;
 
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HabrCareerParse implements Parse{
-
-    private static final Logger log = Logger.getLogger(HabrCareerParse.class);
+public class HabrCareerParse implements Parse {
+    private static final Logger LOG = Logger.getLogger(HabrCareerParse.class);
     private static final String SOURCE_LINK = "https://career.habr.com";
-    private static String PREFIX = "/vacancies?page=";
-    private static String SUFFIX = "&q=Java%20developer&type=all";
-    private static final int PAGES     =  5;
+    private static final int PAGES = 5;
+    private static final String JAVA = "java";
+    private static final String JAVASCRIPT = "javascript";
 
+    private final DateTimeParser dateTimeParser;
 
-    private static String retrieveDescription(String link) {
-        StringBuilder result = new StringBuilder();
-
-        try {
-
-            var document =  Jsoup.connect(link).get();
-            var rows = document.select(".vacancy-description__text");
-
-            rows.forEach(row -> {
-                var descriptionElement = row.select(".style-ugc").first();
-                if (descriptionElement != null) {
-                    result.append(descriptionElement.text());
-                }
-            });
-        } catch (IOException e) {
-            log.error("When parsing description",e);
-        }
-
-
-        return result.toString();
+    public HabrCareerParse(DateTimeParser dateTimeParser) {
+        this.dateTimeParser = dateTimeParser;
     }
 
+    private Post detail(String link) {
+        Post post = new Post();
+        post.setLink(link);
+        try {
+            var document = Jsoup.connect(link).get();
+            var titleElement = document.select(".page-title__title").first();
+            var descriptionElement = document.select(".vacancy-description__text .style-ugc").first();
+            var timeElement = document.select("time").first();
+            if (titleElement != null) {
+                post.setTitle(titleElement.text());
+            }
+            if (descriptionElement != null) {
+                post.setDescription(descriptionElement.text());
+            }
+            if (timeElement != null) {
+                String datetime = timeElement.attr("datetime");
+                post.setTime(Timestamp.valueOf(dateTimeParser.parse(datetime)));
+            }
+        } catch (IOException e) {
+            LOG.error("When load vacancy details: " + link, e);
+        }
+        return post;
+    }
 
     @Override
-    public List<Post> fetch() {
-
-        var result = new ArrayList<Post>();
-
-        try {
-
-            for (int i = 1; i <= PAGES; i++ ) {
-
-                int pageNumber = i;
-                String fullLink = "%s%s%d%s".formatted(SOURCE_LINK, PREFIX, pageNumber, SUFFIX);
-                var connection = Jsoup.connect(fullLink);
-                var document = connection.get();
+    public List<Post> fetch(String link) {
+        List<Post> result = new ArrayList<>();
+        for (int page = 1; page <= PAGES; page++) {
+            String pageLink = link.replaceFirst("page=\\d+", "page=" + page);
+            try {
+                var document = Jsoup.connect(pageLink).get();
                 var rows = document.select(".vacancy-card__inner");
-
                 rows.forEach(row -> {
-
                     var titleElement = row.select(".vacancy-card__title").first();
-                    var linkElement = titleElement.child(0);
-                    var dateElement = row.select(".vacancy-card__date").first();
-                    String vacancyName = titleElement.text();
-                    var vacancyDate = Timestamp.from(
-                            OffsetDateTime.parse(dateElement.child(0).attr("datetime")).toInstant()
-                    );
-                    String link = String.format("%s%s", SOURCE_LINK, linkElement.attr("href"));
-
-                    String description = retrieveDescription(link);
-                    var post = new Post();
-
-                    post.setTitle(vacancyName);
-                    post.setLink(link);
-                    post.setTime(vacancyDate);
-                    post.setDescription(description);
-                    result.add(post);
-                    System.out.println( String.format("%-70s: %40s Дата: %10s", vacancyName, link, vacancyDate));
-                    System.out.println(description);
-
+                    if (titleElement == null) {
+                        return;
+                    }
+                    String title = titleElement.text();
+                    String lowerTitle = title.toLowerCase();
+                    if (!lowerTitle.contains(JAVA) || lowerTitle.contains(JAVASCRIPT)) {
+                        return;
+                    }
+                    var linkElement = titleElement.select("a").first();
+                    if (linkElement == null) {
+                        return;
+                    }
+                    String vacancyLink = SOURCE_LINK + linkElement.attr("href");
+                    result.add(detail(vacancyLink));
                 });
+            } catch (IOException e) {
+                LOG.error("When load page: " + pageLink, e);
             }
-        }catch (IOException e ){
-            log.error("When load page", e );
         }
-
-
         return result;
     }
 
     public static void main(String[] args) {
-
-
-       List<Post> list =  new HabrCareerParse().fetch();
-
+        List<Post> list = new HabrCareerParse(new HabrCareerDateTimeParser())
+                .fetch("https://career.habr.com/vacancies?page=1&q=Java%20developer&type=all");
         System.out.println(list);
-
     }
-
 }
