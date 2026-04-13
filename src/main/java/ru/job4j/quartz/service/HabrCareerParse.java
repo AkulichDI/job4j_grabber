@@ -19,7 +19,27 @@ public class HabrCareerParse implements Parse{
     private static final int PAGES     =  5;
 
 
+    private static String retrieveDescription(String link) {
+        StringBuilder result = new StringBuilder();
 
+        try {
+
+            var document =  Jsoup.connect(link).get();
+            var rows = document.select(".vacancy-description__text");
+
+            rows.forEach(row -> {
+                var descriptionElement = row.select(".style-ugc").first();
+                if (descriptionElement != null) {
+                    result.append(descriptionElement.text());
+                }
+            });
+        } catch (IOException e) {
+            log.error("When parsing description",e);
+        }
+
+
+        return result.toString();
+    }
 
 
     @Override
@@ -32,7 +52,7 @@ public class HabrCareerParse implements Parse{
             for (int i = 1; i <= PAGES; i++ ) {
 
                 int pageNumber = i;
-                String fullLink = "%s%s%d$s".formatted(SOURCE_LINK, PREFIX, pageNumber, SUFFIX);
+                String fullLink = "%s%s%d%s".formatted(SOURCE_LINK, PREFIX, pageNumber, SUFFIX);
                 var connection = Jsoup.connect(fullLink);
                 var document = connection.get();
                 var rows = document.select(".vacancy-card__inner");
@@ -48,15 +68,17 @@ public class HabrCareerParse implements Parse{
                     );
                     String link = String.format("%s%s", SOURCE_LINK, linkElement.attr("href"));
 
-
+                    String description = retrieveDescription(link);
                     var post = new Post();
-
-                    System.out.println( String.format("%-70s: %40s Дата: %10s", vacancyName, link, vacancyDate));
 
                     post.setTitle(vacancyName);
                     post.setLink(link);
                     post.setTime(vacancyDate);
+                    post.setDescription(description);
                     result.add(post);
+                    System.out.println( String.format("%-70s: %40s Дата: %10s", vacancyName, link, vacancyDate));
+                    System.out.println(description);
+
                 });
             }
         }catch (IOException e ){
@@ -72,7 +94,7 @@ public class HabrCareerParse implements Parse{
 
        List<Post> list =  new HabrCareerParse().fetch();
 
-
+        System.out.println(list);
 
     }
 
