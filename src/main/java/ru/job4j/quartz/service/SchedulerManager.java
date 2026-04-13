@@ -63,7 +63,7 @@ public class SchedulerManager implements AutoCloseable{
 
         if (scheduler != null){
             try{
-                scheduler.shutdown();
+                scheduler.shutdown(true);
             }catch (SchedulerException e ){
                 log.error("When shutdown scheduler", e );
             }

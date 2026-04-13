@@ -30,10 +30,6 @@ public class Main {
                 config.get("db.password"));
              SchedulerManager scheduler = new SchedulerManager()) {
             var store = new JdbcStore(connection);
-            var post = new Post();
-            post.setTitle("Super Java Job");
-            post.setTime(new Timestamp(System.currentTimeMillis()));
-            store.save(post);
             scheduler.init();
             scheduler.load(
                     Integer.parseInt(config.get("rabbit.interval")),
