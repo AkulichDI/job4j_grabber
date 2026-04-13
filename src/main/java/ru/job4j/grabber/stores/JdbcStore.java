@@ -21,12 +21,12 @@ public class JdbcStore implements Store {
     @Override
     public void save(Post post) {
         try (PreparedStatement statement = connection.prepareStatement(
-                "INSERT INTO posts (title, link, description, created) VALUES (?, ?, ?, ?)"
+                "INSERT INTO  posts (title, link, description, created) VALUES (?, ?, ?, ?)"
         )) {
             statement.setString(1, post.getTitle());
             statement.setString(2, post.getLink());
             statement.setString(3, post.getDescription());
-            statement.setTimestamp(4, post.getTime());
+            statement.setTimestamp(4, new Timestamp(post.getTime()));
             statement.executeUpdate();
         } catch (SQLException sqlException) {
             log.error("When save Post to dataBase ", sqlException);
@@ -46,7 +46,7 @@ public class JdbcStore implements Store {
                             resultSet.getString("title"),
                             resultSet.getString("link"),
                             resultSet.getString("description"),
-                            resultSet.getTimestamp("created")
+                            resultSet.getTimestamp("created").getTime()
                     ));
                 }
             }
@@ -70,7 +70,7 @@ public class JdbcStore implements Store {
                             resultSet.getString("title"),
                             resultSet.getString("link"),
                             resultSet.getString("description"),
-                            resultSet.getTimestamp("created")
+                            resultSet.getTimestamp("created").getTime()
                     ));
                 }
             }

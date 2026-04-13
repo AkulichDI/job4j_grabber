@@ -1,6 +1,5 @@
 package ru.job4j.grabber.model;
 
-import java.sql.Timestamp;
 import java.util.Objects;
 
 public class Post {
@@ -9,13 +8,20 @@ public class Post {
     private String title;
     private String link;
     private String description;
-    private Timestamp time;
+    private Long time;
 
     @Override
     public boolean equals(Object object) {
-        if (object == null || getClass() != object.getClass()) return false;
+        if (this == object) {
+            return true;
+        }
+        if (object == null || getClass() != object.getClass()) {
+            return false;
+        }
         Post post = (Post) object;
-        return Objects.equals(id, post.id) && Objects.equals(title, post.title) && Objects.equals(link, post.link) && Objects.equals(description, post.description) && Objects.equals(time, post.time);
+        return Objects.equals(id, post.id)
+                && Objects.equals(title, post.title)
+                && Objects.equals(link, post.link);
     }
 
     @Override
@@ -31,7 +37,7 @@ public class Post {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, title, link, description, time);
+        return Objects.hash(id, title, link);
     }
 
     public Long getId() {
@@ -66,15 +72,15 @@ public class Post {
         this.description = description;
     }
 
-    public Timestamp getTime() {
+    public Long getTime() {
         return time;
     }
 
-    public void setTime(Timestamp time) {
+    public void setTime(Long time) {
         this.time = time;
     }
 
-    public Post(Long id, String title, String link, String description, Timestamp time) {
+    public Post(Long id, String title, String link, String description, Long time) {
         this.id = id;
         this.title = title;
         this.link = link;

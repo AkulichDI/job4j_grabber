@@ -7,7 +7,7 @@ import ru.job4j.grabber.utils.DateTimeParser;
 import ru.job4j.grabber.utils.HabrCareerDateTimeParser;
 
 import java.io.IOException;
-import java.sql.Timestamp;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,7 +40,10 @@ public class HabrCareerParse implements Parse {
             }
             if (timeElement != null) {
                 String datetime = timeElement.attr("datetime");
-                post.setTime(Timestamp.valueOf(dateTimeParser.parse(datetime)));
+                post.setTime(dateTimeParser.parse(datetime)
+                        .atZone(ZoneId.systemDefault())
+                        .toInstant()
+                        .toEpochMilli());
             }
         } catch (IOException e) {
             LOG.error("When load vacancy details: " + link, e);
