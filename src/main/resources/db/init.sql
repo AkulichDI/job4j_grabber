@@ -3,7 +3,6 @@ CREATE TABLE IF NOT EXISTS posts (
                                      title TEXT,
                                      link  TEXT UNIQUE,
                                      description TEXT,
-                                     created TIMESTAMP,
-                                     post_id int unique
+                                     created date
 
 );
