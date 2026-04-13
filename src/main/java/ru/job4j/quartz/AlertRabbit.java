@@ -18,11 +18,11 @@ public class AlertRabbit {
         Properties config = new Properties();
 
         try (InputStream in = AlertRabbit.class.getClassLoader().getResourceAsStream("rabbit.properties")){
-
+            if (in == null) {
+                throw new IllegalArgumentException("Resource not found: rabbit.properties");
+            }
             config.load(in);
-
-
-        } catch (IOException e) {
+        } catch (IOException | IllegalArgumentException e) {
             throw new RuntimeException(e);
         }
 
