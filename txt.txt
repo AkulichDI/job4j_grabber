@@ -1,3 +1,20 @@
+
+def authHeader = request?.getHeader("Authorization")
+def apiKeyHdr  = request?.getHeader("X-Api-Key")
+def accessKey  = request?.getParameter("accessKey")
+def query      = request?.getQueryString()
+
+def remoteUser = request?.getRemoteUser()
+def principal  = request?.getUserPrincipal()?.getName()
+
+logger.info("Authorization = ${authHeader}")
+logger.info("X-Api-Key = ${apiKeyHdr}")
+logger.info("accessKey = ${accessKey}")
+logger.info("query = ${query}")
+logger.info("remoteUser = ${remoteUser}")
+logger.info("principal = ${principal}")
+
+
 1. Post
 Класс Post представляет модель данных, описывающую вакансию. Он включает следующие поля:
 
